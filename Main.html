@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RBAC and Authentication Mini-App</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .hidden { display: none; }
+        .message { margin-top: 10px; color: red; }
+        #content-admin, #content-user { border: 1px solid #ccc; padding: 15px; margin-top: 20px; }
+    </style>
+</head>
+<body>
+    <h1>Login</h1>
+    <form id="loginForm">
+        <label for="username">Username:</label>
+        <input type="text" id="username" name="username" required><br><br>
+        <label for="password">Password:</label>
+        <input type="password" id="password" name="password" required><br><br>
+        <button type="submit">Login</button>
+        <p id="loginMessage" class="message"></p>
+    </form>
+
+    <div id="dashboard" class="hidden">
+        <h2>Welcome, <span id="loggedInUser"></span>!</h2>
+        <p>Your Role: <span id="userRole"></span></p>
+
+        <div id="content-admin" class="hidden">
+            <h3>Admin Panel</h3>
+            <p>This content is only visible to users with the 'admin' role.</p>
+            <button onclick="alert('Admin action performed!')">Perform Admin Action</button>
+        </div>
+
+        <div id="content-user" class="hidden">
+            <h3>User Content</h3>
+            <p>This content is visible to all logged-in users.</p>
+            <button onclick="alert('User action performed!')">Perform User Action</button>
+        </div>
+
+        <button onclick="logout()">Logout</button>
+    </div>
+
+    <script>
+        const users = {
+            "admin": { password: "adminpassword", role: "admin" },
+            "user": { password: "userpassword", role: "user" }
+        };
+
+        let currentUser = null;
+
+        document.getElementById('loginForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            const loginMessage = document.getElementById('loginMessage');
+
+            if (users[username] && users[username].password === password) {
+                currentUser = users[username];
+                document.getElementById('loggedInUser').textContent = username;
+                document.getElementById('userRole').textContent = currentUser.role;
+                loginMessage.textContent = '';
+                document.getElementById('loginForm').classList.add('hidden');
+                document.getElementById('dashboard').classList.remove('hidden');
+                applyAccessControl();
+            } else {
+                loginMessage.textContent = 'Invalid username or password.';
+            }
+        });
+
+        function applyAccessControl() {
+            document.getElementById('content-admin').classList.add('hidden');
+            document.getElementById('content-user').classList.add('hidden');
+
+            if (currentUser) {
+                document.getElementById('content-user').classList.remove('hidden');
+                if (currentUser.role === 'admin') {
+                    document.getElementById('content-admin').classList.remove('hidden');
+                }
+            }
+        }
+
+        function logout() {
+            currentUser = null;
+            document.getElementById('loginForm').classList.remove('hidden');
+            document.getElementById('dashboard').classList.add('hidden');
+            document.getElementById('username').value = '';
+            document.getElementById('password').value = '';
+            document.getElementById('loginMessage').textContent = '';
+            document.getElementById('content-admin').classList.add('hidden');
+            document.getElementById('content-user').classList.add('hidden');
+        }
+    </script>
+</body>
+</html>
